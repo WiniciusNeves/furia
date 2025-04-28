@@ -1,0 +1,8 @@
+declare module '@env' {
+  export const GAMES_URL: string;
+  export const LOGIN_USER_URL: string;
+  export const USER_PREFERENCES_URL: string;
+  export const REGISTER_USER_URL: string;
+  export const NEWS_API_URL: string;
+  export const CHATBOT_URL: string;
+}
