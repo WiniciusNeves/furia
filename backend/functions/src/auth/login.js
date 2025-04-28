@@ -2,31 +2,53 @@ const admin = require('../config/firebaseAdmin');
 
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, name, picture, googleId } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).send({ error: 'E-mail e senha são obrigatórios.' });
+    if (!email || !googleId) {
+      return res.status(400).send({ error: 'Email e ID do Google são obrigatórios.' });
     }
 
-    // Realizar o login com email e senha usando Firebase Admin SDK
-    const userRecord = await admin.auth().getUserByEmail(email);
-    // Dados do usuário
-    const userData = {
+    let userRecord;
+    try {
+      // Tenta buscar o usuário pelo email
+      userRecord = await admin.auth().getUserByEmail(email);
+    } catch (error) {
+      if (error.code === 'auth/user-not-found') {
+        // Se não existe, cria um novo usuário
+        userRecord = await admin.auth().createUser({
+          email,
+          displayName: name,
+          photoURL: picture,
+          password: googleId, 
+        });
+        console.log(`Usuário criado via Google: ${userRecord.uid}`);
+      } else {
+        throw error;
+      }
+    }
+
+    // Atualiza foto e nome se mudou
+    await admin.auth().updateUser(userRecord.uid, {
+      displayName: name,
+      photoURL: picture,
+    });
+
+    // Gera um token customizado
+    const token = await admin.auth().createCustomToken(userRecord.uid);
+
+    return res.status(200).send({
+      message: 'Login/Registro com Google bem-sucedido!',
       uid: userRecord.uid,
       email: userRecord.email,
-      displayName: userRecord.displayName || null,
-      photoURL: userRecord.photoURL || null,
-      emailVerified: userRecord.emailVerified,
-    };
-
-    console.log('Dados do usuário após login:', userData);
-    return res.status(200).send({ message: 'Login bem-sucedido!', ...userData });
+      displayName: userRecord.displayName,
+      photoURL: userRecord.photoURL,
+      token,
+    });
 
   } catch (error) {
-    console.error('Erro ao fazer login:', error);
+    console.error('Erro ao fazer login com Google:', error);
     return res.status(500).send({ error: error.message });
   }
 };
 
 module.exports = loginUser;
-
