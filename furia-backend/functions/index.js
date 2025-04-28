@@ -5,6 +5,9 @@ const registerUser = require("./src/auth/user");
 const loginUser = require("./src/auth/login");
 const newsAPI = require("./src/data/news");
 const userPreferences = require("./src/data/userPreferences");
+const chatbot = require("./src/chat/chatBot");
+const games = require("./src/data/games");
+
 
 exports.registerUser = onRequest(async (request, response) => {
   logger.info("Chamada para a função registerUser", { structuredData: true });
@@ -26,3 +29,13 @@ exports.userPreferences = onRequest(async (request, response) => {
   await userPreferences.salvarEBuscarPreferenciasFuria(request, response);  // Chama a função de userPreferences.js
 });
 
+
+exports.chatbot = onRequest(async (request, response) => {
+  logger.info("Chamada para a função chatbot", { structuredData: true });
+  await chatbot(request, response);
+});
+
+exports.games = onRequest(async (request, response) => {
+  logger.info("Chamada para a função games", { structuredData: true });
+  await games(request, response);
+});

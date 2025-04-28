@@ -75,3 +75,4 @@ exports.salvarEBuscarPreferenciasFuria = functions.https.onRequest(async (reques
   }
 });
 
+
