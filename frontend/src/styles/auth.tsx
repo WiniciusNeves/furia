@@ -99,11 +99,16 @@ const styles = StyleSheet.create({
     },
     registerContainer: {
         marginTop: 10,
-      },
-      registerText: {
+    },
+    registerText: {
         color: '#fff',
         fontSize: 20,
-      },
+    },
+    backText: {
+        color: '#fff',
+        fontSize: 20,
+        marginTop: 10,
+    }
 });
 
 export default styles;

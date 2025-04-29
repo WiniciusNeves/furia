@@ -6,7 +6,7 @@ import Onboarding from './src/screens/onboarding';
 import Onboarding2 from './src/screens/onboarding2';
 import Onboarding3 from './src/screens/onboarding3';
 import Auth from './src/screens/auth';
-
+import CreateUser from './src/screens/createUser';
 const Stack = createStackNavigator();
 
 export default function AppNavigator() {
@@ -19,7 +19,9 @@ export default function AppNavigator() {
         <Stack.Screen name="onboarding3" component={Onboarding3} options={{ headerShown: false }} />
         <Stack.Screen name="auth" component={Auth} options={{ headerShown: false }} />
 
-        
+        <Stack.Screen name="CreateUser" component={CreateUser} options={{ headerShown: false}} />
+
+
 
 
       </Stack.Navigator>
