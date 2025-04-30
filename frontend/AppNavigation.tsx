@@ -7,6 +7,10 @@ import Onboarding2 from './src/screens/onboarding2';
 import Onboarding3 from './src/screens/onboarding3';
 import Auth from './src/screens/auth';
 import CreateUser from './src/screens/createUser';
+import Home from './src/screens/home';
+import ChatBot from './src/screens/chatbox';
+
+
 const Stack = createStackNavigator();
 
 export default function AppNavigator() {
@@ -18,6 +22,8 @@ export default function AppNavigator() {
         <Stack.Screen name="onboarding2" component={Onboarding2} options={{ headerShown: false }} />
         <Stack.Screen name="onboarding3" component={Onboarding3} options={{ headerShown: false }} />
         <Stack.Screen name="auth" component={Auth} options={{ headerShown: false }} />
+        <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+        <Stack.Screen name="ChatBot" component={ChatBot} options={{ headerShown: false }} />
 
         <Stack.Screen name="CreateUser" component={CreateUser} options={{ headerShown: false}} />
 
