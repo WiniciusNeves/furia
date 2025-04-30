@@ -33,7 +33,7 @@ exports.newsAPI = onRequest(async (request, response) => {
 
 exports.userPreferences = onRequest(async (request, response) => {
   logger.info("Chamada para a função userPreferences", { structuredData: true });
-  await userPreferences.salvarEBuscarPreferenciasFuria(request, response);  // Chama a função de userPreferences.js
+  await userPreferences.salvarEBuscarPreferenciasFuria(request, response);  
 });
 
 

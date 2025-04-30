@@ -22,92 +22,94 @@ const chatbot = onRequest(async (request, response) => {
   }
 
   try {
-    const { message } = request.body;
+    const { pergunta, userId } = request.body;
 
-    if (!message) {
-      response.status(400).json({ error: 'Mensagem é obrigatória.' });
+    if (!pergunta) {
+      response.status(400).json({ error: 'A pergunta é obrigatória.' });
       return;
     }
 
-    logger.info(`Mensagem recebida: ${message}`);
+    logger.info(`Pergunta recebida: ${pergunta}`);
 
     let botResponse = '';
+    const lowerMessage = pergunta.toLowerCase();
 
-    // Tratar diferentes tipos de perguntas
-    const lowerMessage = message.toLowerCase();
-
-    // Responder sobre notícias
+    // Notícias
     if (lowerMessage.includes('notícia') || lowerMessage.includes('noticias') || lowerMessage.includes('news')) {
       const snapshot = await db.collection('news').orderBy('data', 'desc').limit(3).get();
 
       if (snapshot.empty) {
         botResponse = 'Não encontrei notícias recentes.';
       } else {
-        botResponse = 'Últimas notícias:\n\n';
+        botResponse = '📰 Últimas notícias:\n\n';
         snapshot.forEach(doc => {
           const data = doc.data();
           botResponse += `• ${data.titulo}\n🔗 Link: ${data.link}\n\n`;
         });
       }
 
-    } 
-    // Responder sobre tabela de jogos
+    }
+    // Tabela de jogos
     else if (lowerMessage.includes('tabela') || lowerMessage.includes('jogo') || lowerMessage.includes('partida')) {
       const snapshot = await db.collection('games').orderBy('data', 'asc').limit(5).get();
 
       if (snapshot.empty) {
         botResponse = 'Não há jogos programados no momento.';
       } else {
-        botResponse = 'Próximos jogos:\n\n';
+        botResponse = '🎮 Próximos jogos:\n\n';
         snapshot.forEach(doc => {
           const data = doc.data();
           botResponse += `• ${data.data} às ${data.horario}: FURIA vs ${data.adversario} (${data.campeonato}) no ${data.local}\n\n`;
         });
       }
 
-    } 
-    // Responder sobre preferências
+    }
+    // Preferências do usuário
     else if (lowerMessage.includes('preferência') || lowerMessage.includes('configuração') || lowerMessage.includes('configurar')) {
-      const userId = request.body.userId;
       if (!userId) {
-        botResponse = 'O ID do usuário é necessário para buscar as preferências.';
+        botResponse = '❗ O ID do usuário é necessário para buscar as preferências.';
       } else {
         const doc = await db.collection('userPreferences').doc(userId).get();
         if (doc.exists) {
           const preferences = doc.data();
-          botResponse = `Suas preferências:\nJogador Favorito: ${preferences.jogadorFavorito || 'N/A'}\nMapa Favorito: ${preferences.mapaFavorito || 'N/A'}\nArma Favorita: ${preferences.armaFavorita || 'N/A'}\n`;
+          botResponse = `🔧 Suas preferências:\n`;
+          botResponse += `• Jogador favorito: ${preferences.jogadorFavorito || 'N/A'}\n`;
+          botResponse += `• Mapa favorito: ${preferences.mapaFavorito || 'N/A'}\n`;
+          botResponse += `• Arma favorita: ${preferences.armaFavorita || 'N/A'}\n`;
         } else {
-          botResponse = 'Preferências não encontradas para este usuário.';
+          botResponse = '❌ Preferências não encontradas para este usuário.';
         }
       }
 
-    } 
-    // Responder sobre perfil de usuário
-    else if (lowerMessage.includes('usuario') || lowerMessage.includes('profile')) {
-      const userId = request.body.userId;
+    }
+    // Perfil do usuário
+    else if (lowerMessage.includes('usuário') || lowerMessage.includes('perfil') || lowerMessage.includes('profile')) {
       if (!userId) {
-        botResponse = 'O ID do usuário é necessário para buscar as informações do perfil.';
+        botResponse = '❗ O ID do usuário é necessário para buscar o perfil.';
       } else {
         const userRecord = await admin.auth().getUser(userId);
         const doc = await db.collection('userPreferences').doc(userId).get();
+
+        botResponse = `👤 Perfil do usuário:\n`;
+        botResponse += `• Nome: ${userRecord.displayName || 'N/A'}\n`;
+
         if (doc.exists) {
           const userData = doc.data();
-          botResponse = `Seu perfil de usuário:\nNome: ${userRecord.displayName || 'N/A'}\n`;
           Object.keys(userData).forEach(key => {
-            botResponse += `Perfereicas do usuário:\n${key}: ${userData[key] || 'N/A'}\n`;
+            botResponse += `• ${key.charAt(0).toUpperCase() + key.slice(1)}: ${userData[key] || 'N/A'}\n`;
           });
         } else {
-          botResponse = 'Perfil de usuário não encontrado.';
+          botResponse += '• Preferências não encontradas.';
         }
       }
 
-    } 
-    // Caso o chatbot não entenda
+    }
+    // Comando desconhecido
     else {
-      botResponse = 'Desculpe, não entendi. Você pode perguntar sobre "notícias", "tabela de jogos", "preferências" ou "usuário".';
+      botResponse = '🤖 Desculpe, não entendi.\nVocê pode perguntar sobre:\n- Notícias\n- Tabela de jogos\n- Preferências\n- Perfil do usuário';
     }
 
-    response.status(200).json({ response: botResponse });
+    response.status(200).json({ resposta: botResponse });
 
   } catch (error) {
     logger.error('Erro no chatbot:', error);
