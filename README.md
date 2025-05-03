@@ -8,12 +8,14 @@ Este projeto consiste em um aplicativo móvel desenvolvido com React Native, que
 ## 📱 Tecnologias Utilizadas
 
 ### Frontend
+
 - React Native (com Expo)
 - Firebase Auth
 - Fetch API para comunicação HTTP
 - Componentes personalizados (Header, BottomMenu)
 
 ### Backend
+
 - Firebase Cloud Functions
 - Firebase Auth (para autenticação de usuários)
 - Firestore (para armazenar dados como notícias, jogos e preferências)
@@ -23,11 +25,13 @@ Este projeto consiste em um aplicativo móvel desenvolvido com React Native, que
 ## ⚙️ Funcionalidades
 
 ### Chatbot
+
 - Envia perguntas para o backend via Cloud Function
 - Recebe e exibe respostas do bot
 - Armazena histórico da conversa localmente
 
 ### Tipos de Pergunta Reconhecidos
+
 - `notícia`, `noticias`, `news`: mostra as últimas notícias
 - `tabela`, `jogo`, `partida`: mostra próximos jogos da FURIA
 - `preferência`, `configuração`: exibe as preferências do usuário autenticado
@@ -49,25 +53,52 @@ Este projeto consiste em um aplicativo móvel desenvolvido com React Native, que
 ### Frontend (React Native)
 
 ```
-/src
-  /components
-    Header.js
-    BottomMenu.js
-  /screens
-    Chatbot.js
-  /styles
-    chatbot.js
-firebase.js
-.env
+/src 
+  /assets/images 
+  /components 
+    ForgotPasswordModal.tsx 
+    Header.tsx 
+    BottomMenu.tsx 
+    NewsAddModal.tsx 
+  /config 
+    firebaseConfig.tsx 
+  /screens 
+    Home.tsx 
+    Chatbot.tsx 
+    Auth.tsx 
+    CreateUser.tsx 
+    Menu.tsx 
+    AlterarDados.tsx 
+    Politica.tsx 
+    Profile.tsx 
+  /styles 
+    home.tsx
+    modalStyles.tsx
+    onboarding.tsx
+    perfil.tsx
+    chatbot.tsx 
+    auth.tsx 
+    profile.tsx
+firebase.tsx
+ .env
 ```
 
 ### Backend (Firebase Functions)
 
 ```
 /functions
-  /config
-    firebaseAdmin.js
-  chatbot.js
+  /src
+   /auth
+    loginGoogle.js
+    loginUser.js
+    user.js
+   /chat
+    chatbot.js
+   /config
+   /data
+    news.js
+    userPreferences.js
+    games.js
 ```
 
 ---
