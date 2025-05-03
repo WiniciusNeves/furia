@@ -7,8 +7,9 @@ import {
   FlatList,
   Image,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../styles/chatbot';
 import Header from '../components/Header';
 import BottomMenu from '../components/BottomMenu';
@@ -28,11 +29,17 @@ const Chatbot = () => {
     setInput('');
 
     try {
+      // Obtém o UID do AsyncStorage
+      const uid = await AsyncStorage.getItem('uid');
+      if (!uid) {
+        throw new Error('Usuário não autenticado.');
+      }
+
+      // Envia a mensagem para o chatbot
       const response = await fetch(CHATBOT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pergunta: input, userId: 'defaultUserId' }), // Replace 'defaultUserId' with the actual user ID logic
-
+        body: JSON.stringify({ pergunta: input, userId: uid }),
       });
 
       const data = await response.json();
@@ -43,6 +50,7 @@ const Chatbot = () => {
       };
       setMessages(prev => [...prev, botReply]);
     } catch (error) {
+      console.error('Erro ao conectar com o chatbot:', error);
       const botError = {
         id: Date.now().toString() + '_error',
         text: 'Erro ao conectar com o bot.',

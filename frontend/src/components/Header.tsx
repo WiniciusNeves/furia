@@ -18,10 +18,12 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           <Ionicons name="person-circle-outline" size={39} color="#f90" />
         </TouchableOpacity>
       </View>
-      <View style={{ marginTop: 10, backgroundColor: '#333', borderRadius: 10, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10 }}>
-        <Ionicons name="search" size={20} color="#aaa" />
-        <TextInput placeholder="Buscar" placeholderTextColor="#aaa" style={{ flex: 1, color: '#fff', marginLeft: 10 }} />
-      </View>
+      {title === 'Noticias' && (
+        <View style={{ marginTop: 10, backgroundColor: '#333', borderRadius: 10, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10 }}>
+          <Ionicons name="search" size={20} color="#aaa" />
+          <TextInput placeholder="Buscar" placeholderTextColor="#aaa" style={{ flex: 1, color: '#fff', marginLeft: 10 }} />
+        </View>
+      )}
     </View>
   );
 };
