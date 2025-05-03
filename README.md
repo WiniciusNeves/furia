@@ -87,9 +87,18 @@ firebase.tsx
 
 ```
 /functions
-  /config
-    firebaseAdmin.js
-  chatbot.js
+  /src
+   /auth
+    loginGoogle.js
+    loginUser.js
+    user.js
+   /chat
+    chatbot.js
+   /config
+   /data
+    news.js
+    userPreferences.js
+    games.js
 ```
 
 ---
