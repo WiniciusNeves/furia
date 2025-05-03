@@ -2,11 +2,13 @@ const { onRequest } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 
 const registerUser = require("./src/auth/user");
-const loginUser = require("./src/auth/login");
+const loginUser = require("./src/auth/loginUser");
+const loginGoogle = require("./src/auth/loginGoogle");
 const newsAPI = require("./src/data/news");
 const userPreferences = require("./src/data/userPreferences");
 const chatbot = require("./src/chat/chatBot");
 const games = require("./src/data/games");
+
 
 
 exports.registerUser = onRequest(async (request, response) => {
@@ -19,6 +21,11 @@ exports.loginUser = onRequest(async (request, response) => {
   await loginUser(request, response);  // Chama a função de login.js
 });
 
+exports.loginGoogle = onRequest(async (request, response) => {
+  logger.info("Chamada para a função loginGoogle", { structuredData: true });
+  await loginGoogle(request, response); // Chama a função de loginGoogle.js
+})
+
 exports.newsAPI = onRequest(async (request, response) => {
   logger.info("Chamada para a função newsAPI", { structuredData: true });
   await newsAPI(request, response);  // Chama a função de news.js
@@ -26,7 +33,7 @@ exports.newsAPI = onRequest(async (request, response) => {
 
 exports.userPreferences = onRequest(async (request, response) => {
   logger.info("Chamada para a função userPreferences", { structuredData: true });
-  await userPreferences.salvarEBuscarPreferenciasFuria(request, response);  // Chama a função de userPreferences.js
+  await userPreferences.salvarEBuscarPreferenciasFuria(request, response);  
 });
 
 

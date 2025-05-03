@@ -1,20 +1,25 @@
-import React, { useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import * as Google from 'expo-auth-session/providers/google';
 import { makeRedirectUri } from 'expo-auth-session';
-
-import { LOGIN_USER_URL } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../styles/auth';
+import ForgotPasswordModal from '@/components/ForgotPasswordModal';
+import { auth } from '../config/firebaseConfig';
+import { signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 
 export default function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: '853140539901-o9afo7mgulcdqeg04gtdm8pv81auc03g.apps.googleusercontent.com',
-    androidClientId: 'YOUR_ANDROID_CLIENT_ID',
+    androidClientId: '853140539901-9nnh3vprjrrj5dp7k96icld9r6n0svs8.apps.googleusercontent.com',
     webClientId: '853140539901-o9afo7mgulcdqeg04gtdm8pv81auc03g.apps.googleusercontent.com',
-    redirectUri: makeRedirectUri({
-      scheme: 'frontendapp',
-    }),
+    redirectUri: makeRedirectUri({ scheme: 'frontendapp' }),
   });
 
   useEffect(() => {
@@ -26,92 +31,108 @@ export default function LoginScreen({ navigation }) {
     }
   }, [response]);
 
+  const handleGoogleLogin = async (accessToken: string) => {
+    try {
+      const credential = GoogleAuthProvider.credential(null, accessToken);
+      const userCredential = await signInWithCredential(auth, credential);
 
-    async function handleGoogleLogin(accessToken: string) {
-        try {
-            const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                headers: { Authorization: `Bearer ${accessToken}` },
-            });
-            const userInfo = await res.json();
+      console.log('Login Google com Firebase:', userCredential.user);
 
-            const backendRes = await fetch(LOGIN_USER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: userInfo.email,
-                    name: userInfo.name,
-                    picture: userInfo.picture,
-                    googleId: userInfo.sub,
-                }),
-            });
+      await AsyncStorage.setItem('uid', userCredential.user.uid);
 
-            const data = await backendRes.json();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (error) {
+      console.log('Erro no login com Google (Firebase):', error);
+      Alert.alert('Erro', 'Não foi possível autenticar com Google.');
+    }
+  };
 
-            if (backendRes.ok) {
-                console.log('Usuário registrado/logado com sucesso:', data);
-                // Navegar para a tela Home
-                navigation.navigate('Home');
-            } else {
-                console.error('Erro no login backend:', data);
-            }
-        } catch (error) {
-            console.error('Erro ao logar com Google:', error);
-        }
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Atenção', 'Preencha todos os campos.');
+      return;
     }
 
-    return (
-        <View style={styles.container}>
-            <Image
-                source={require('../assets/images/furia_background.png')}
-                style={styles.backgroundImage}
-            />
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('Login com Firebase:', userCredential.user);
 
-            <Image
-                source={require('../assets/images/Juntos.png')}
-                style={styles.logo}
-            />
+      await AsyncStorage.setItem('uid', userCredential.user.uid);
 
-            <Text style={styles.title}>Faça login para continuar!</Text>
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    } catch (error) {
+      console.log('Erro no login com Firebase:', error);
+      Alert.alert('Erro', 'Email ou senha inválidos.');
+    }
+  };
 
-            <Text style={styles.subtitle}>
-                Entre com seu e-mail e senha para acessar seus dados, acompanhar suas atividades e aproveitar todos os recursos disponíveis.
-            </Text>
+  return (
+    <View style={styles.container}>
+      <Image source={require('../assets/images/furia_background.png')} style={styles.backgroundImage} />
+      <Image source={require('../assets/images/Juntos.png')} style={styles.logo} />
 
-            <TouchableOpacity style={styles.googleButton} onPress={() => promptAsync()}>
-                <AntDesign name="google" size={20} color="#fff" style={{ marginRight: 10 }} />
-                <Text style={styles.googleButtonText}>Entrar com Google</Text>
-            </TouchableOpacity>
+      <Text style={styles.title}>Faça login para continuar!</Text>
+      <Text style={styles.subtitle}>
+        Entre com seu e-mail e senha para acessar seus dados, acompanhar suas atividades e aproveitar todos os recursos disponíveis.
+      </Text>
 
-            <View style={styles.inputContainer}>
-                <Feather name="mail" size={20} color="#C18624" style={styles.icon} />
-                <TextInput
-                    placeholder="Email"
-                    placeholderTextColor="#C18624"
-                    style={styles.input}
-                />
-            </View>
+      <TouchableOpacity style={styles.googleButton} onPress={() => promptAsync()}>
+        <AntDesign name="google" size={20} color="#fff" style={{ marginRight: 10 }} />
+        <Text style={styles.googleButtonText}>Entrar com Google</Text>
+      </TouchableOpacity>
 
-            <View style={styles.inputContainer}>
-                <Feather name="lock" size={20} color="#C18624" style={styles.icon} />
-                <TextInput
-                    placeholder="Password"
-                    placeholderTextColor="#C18624"
-                    secureTextEntry
-                    style={styles.input}
-                />
-            </View>
+      <View style={styles.inputContainer}>
+        <Feather name="mail" size={20} color="#C18624" style={styles.icon} />
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="#C18624"
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+        />
+      </View>
 
-            <TouchableOpacity style={styles.forgotPassword}>
-                <Text style={styles.forgotPasswordText}>Esqueceu a <Text style={{ fontWeight: 'bold' }}>senha?</Text></Text>
-            </TouchableOpacity>
+      <View style={styles.inputContainer}>
+        <Feather name="lock" size={20} color="#C18624" style={styles.icon} />
+        <TextInput
+          placeholder="Senha"
+          placeholderTextColor="#C18624"
+          secureTextEntry
+          style={styles.input}
+          value={password}
+          onChangeText={setPassword}
+        />
+      </View>
 
-            <TouchableOpacity style={styles.loginButton}>
-                <Text style={styles.loginButtonText}>Entrar</Text>
-            </TouchableOpacity>
+      <TouchableOpacity style={styles.forgotPassword} onPress={() => setModalVisible(true)}>
+        <Text style={styles.forgotPasswordText}>
+          Esqueceu a <Text style={{ fontWeight: 'bold' }}>senha?</Text>
+        </Text>
+      </TouchableOpacity>
 
-            <TouchableOpacity style={styles.registerContainer}>
-                <Text style={styles.registerText}>Quer criar sua <Text style={{ fontWeight: 'bold', fontStyle: 'italic' }}>Conta?</Text></Text>
-            </TouchableOpacity>
-        </View>
-    );
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.loginButtonText}>Entrar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.registerContainer} onPress={() => navigation.navigate('CreateUser')}>
+        <Text style={styles.registerText}>
+          Quer criar sua <Text style={{ fontWeight: 'bold', fontStyle: 'italic' }}>Conta?</Text>
+        </Text>
+      </TouchableOpacity>
+
+      <ForgotPasswordModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        email={recoveryEmail}
+        onEmailChange={setRecoveryEmail}
+      />
+    </View>
+  );
 }

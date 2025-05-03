@@ -1,6 +1,6 @@
 const admin = require('../config/firebaseAdmin');
 
-const loginUser = async (req, res) => {
+const loginGoogle = async (req, res) => {
   try {
     const { email, name, picture, googleId } = req.body;
 
@@ -14,7 +14,6 @@ const loginUser = async (req, res) => {
       userRecord = await admin.auth().getUserByEmail(email);
     } catch (error) {
       if (error.code === 'auth/user-not-found') {
-        // Se não existe, cria um novo usuário
         userRecord = await admin.auth().createUser({
           email,
           displayName: name,
@@ -51,4 +50,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = loginUser;
+module.exports = loginGoogle;

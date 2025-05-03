@@ -15,8 +15,11 @@ const SplashScreen = () => {
                     clearInterval(timer);
                     // Delay the navigation using setTimeout
                     setTimeout(() => {
-                        if (navigation && navigation.navigate) {
-                            navigation.navigate('Onboarding');
+                        if (navigation && navigation.reset) {
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'Onboarding' }], // Redefine o histórico para a tela 'Onboarding'
+                            });
                         }
                     }, 0); // Minimal delay
                 }
